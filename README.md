@@ -1,3 +1,5 @@
+# :warning: This project is non-functional as it is under development. Do NOT use it.
+
 # @bestcodes/edge-tts
 
 [![npm version](https://badge.fury.io/js/%40bestcodes%2Fedge-tts.svg)](https://badge.fury.io/js/%40bestcodes%2Fedge-tts)
