@@ -1,0 +1,1 @@
+"use strict";var RATE;Object.defineProperty(exports,"__esModule",{value:!0}),exports.RATE=void 0,function(e){e.X_SLOW="x-slow",e.SLOW="slow",e.MEDIUM="medium",e.FAST="fast",e.X_FAST="x-fast",e.DEFAULT="default"}(RATE||(exports.RATE=RATE={}));

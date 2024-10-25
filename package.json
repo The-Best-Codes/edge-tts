@@ -1,0 +1,31 @@
+{
+  "name": "@bestcodes/edge-tts",
+  "version": "1.0.0",
+  "description": "An Azure Speech Service module that uses the Microsoft Edge Read Aloud API.",
+  "author": "The-Best-Codes",
+  "license": "MIT",
+  "repository": "https://github.com/The-Best-Codes/edge-tts.git",
+  "private": false,
+  "module": "./dist/index",
+  "main": "./dist/index",
+  "scripts": {
+    "minify": "find dist/ -name '*.js' -type f -exec terser {} --compress --mangle --output {} \\;",
+    "build": "tsc --project tsconfig.json --outDir dist && npm run minify",
+    "prepublishOnly": "npm run build",
+    "depclean": "sh depclean.sh",
+    "update": "npm update --save && npm update --save-dev && npx npm-check-updates@latest -u && npm install",
+    "maintain": "npm run depclean && npm run update"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.1",
+    "@types/randombytes": "^2.0.3",
+    "axios": "^1.7.7",
+    "buffer": "^6.0.3",
+    "isomorphic-ws": "^5.0.0",
+    "randombytes": "^2.1.0",
+    "terser": "^5.36.0"
+  },
+  "files": [
+    "dist/"
+  ]
+}

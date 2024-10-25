@@ -1,0 +1,1 @@
+"use strict";var OUTPUT_FORMAT;Object.defineProperty(exports,"__esModule",{value:!0}),exports.OUTPUT_FORMAT=void 0,function(O){O.AUDIO_24KHZ_48KBITRATE_MONO_MP3="audio-24khz-48kbitrate-mono-mp3",O.AUDIO_24KHZ_96KBITRATE_MONO_MP3="audio-24khz-96kbitrate-mono-mp3",O.WEBM_24KHZ_16BIT_MONO_OPUS="webm-24khz-16bit-mono-opus"}(OUTPUT_FORMAT||(exports.OUTPUT_FORMAT=OUTPUT_FORMAT={}));

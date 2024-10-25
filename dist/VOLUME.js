@@ -1,0 +1,1 @@
+"use strict";var VOLUME;Object.defineProperty(exports,"__esModule",{value:!0}),exports.VOLUME=void 0,function(e){e.SILENT="silent",e.X_SOFT="x-soft",e.SOFT="soft",e.MEDIUM="medium",e.LOUD="loud",e.X_LOUD="x-LOUD",e.DEFAULT="default"}(VOLUME||(exports.VOLUME=VOLUME={}));
