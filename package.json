@@ -1,11 +1,30 @@
 {
   "name": "@bestcodes/edge-tts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An Azure Speech Service module that uses the Microsoft Edge Read Aloud API.",
   "author": "The-Best-Codes",
   "license": "MIT",
-  "repository": "https://github.com/The-Best-Codes/edge-tts.git",
-  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/The-Best-Codes/edge-tts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/The-Best-Codes/edge-tts/issues"
+  },
+  "homepage": "https://github.com/The-Best-Codes/edge-tts#readme",
+  "keywords": [
+    "tts",
+    "text-to-speech",
+    "speech",
+    "text",
+    "voice",
+    "ssml",
+    "azure",
+    "speech-synthesis",
+    "readaloud",
+    "edge",
+    "microsoft"
+  ],
   "module": "./dist/index",
   "main": "./dist/index",
   "scripts": {
