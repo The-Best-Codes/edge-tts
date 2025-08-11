@@ -36,7 +36,7 @@
     "maintain": "npm run depclean && npm run update"
   },
   "devDependencies": {
-    "@types/node": "^22.8.1",
+    "@types/node": "^24.2.1",
     "@types/randombytes": "^2.0.3",
     "axios": "^1.7.7",
     "buffer": "^6.0.3",
