@@ -33,8 +33,6 @@ export function unescapeXml(safe: string): string {
 }
 
 export function dateToString(): string {
-  // Return Javascript-style date string.
-  // Using generic GMT string to match Python implementation behavior
   const date = new Date();
   return date.toUTCString();
 }
@@ -77,30 +75,12 @@ function findSafeUtf8SplitPoint(textSegment: Buffer): number {
   while (splitAt > 0) {
     const sub = textSegment.subarray(0, splitAt);
     try {
-      // If we can decode without replacement chars at the end, it is likely valid.
-      // However, Node's toString() replaces invalid seqs.
-      // Better check: is the byte at splitAt a continuation byte?
-      // UTF-8 start bytes are 0xxxxxxx or 11xxxxxx. Continuation is 10xxxxxx.
-      // We want to stop BEFORE a start byte if we cut mid-char.
-
-      // Simpler check: try decoding. If the last char is the replacement char, we cut it.
-      // But standard check:
       const lastByte = sub[sub.length - 1];
       if (lastByte !== undefined && (lastByte & 0x80) === 0) {
         return splitAt; // ASCII, safe
       }
 
-      // Check if we just cut a multibyte char
-      // We verify by trying to decode just the end.
-      // A more robust way used in python logic:
-      // In JS buffers, we can just walk back until we find a non-continuation byte
-      // and ensure we include the full sequence.
-
-      // Replicating Python logic:
-      // Check if sub is valid UTF-8
       const str = sub.toString("utf-8");
-      // Node doesn't throw on invalid UTF-8, it inserts \uFFFD.
-      // So we check if the Buffer length matches re-encoding.
       if (Buffer.from(str).length === sub.length && !str.endsWith("\uFFFD")) {
         return splitAt;
       }
@@ -150,10 +130,6 @@ export function* splitTextByByteLength(
     }
 
     const chunk = buffer.subarray(0, splitAt);
-    // Strip logic in buffers (start/end spaces/newlines)
-    // For simplicity, we convert to string to strip if needed,
-    // but the stream usually concatenates seamlessly.
-    // Python code does .strip().
     const chunkStr = chunk.toString("utf-8").trim();
     if (chunkStr.length > 0) {
       yield Buffer.from(chunkStr);

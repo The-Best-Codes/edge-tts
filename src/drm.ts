@@ -25,7 +25,6 @@ export class DRM {
   }
 
   static handleClientResponseError(headers: Record<string, any>): void {
-    // In Axios/Node, headers are usually lower-case keys
     const serverDate = headers["date"] || headers["Date"];
 
     if (!serverDate || typeof serverDate !== "string") {
@@ -46,14 +45,10 @@ export class DRM {
   static generateSecMsGec(): string {
     let ticks = DRM.getUnixTimestamp();
 
-    // Switch to Windows file time epoch (1601-01-01 00:00:00 UTC)
     ticks += WIN_EPOCH;
 
-    // Round down to the nearest 5 minutes (300 seconds)
     ticks -= ticks % 300;
 
-    // Convert to 100-nanosecond intervals (Windows file time format)
-    // 1 second = 10,000,000 intervals of 100ns
     ticks *= 10_000_000;
 
     const strToHash = `${ticks.toFixed(0)}${TRUSTED_CLIENT_TOKEN}`;

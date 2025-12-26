@@ -17,8 +17,8 @@ async function fetchVoicesInternal(proxy?: string): Promise<Voice[]> {
   const response = await axios.get(url, {
     headers,
     httpsAgent: agent,
-    proxy: false, // Axios proxy config is different, we use httpsAgent
-    validateStatus: (status) => status < 500, // handle 403 manually
+    proxy: false,
+    validateStatus: (status) => status < 500,
   });
 
   if (response.status === 403) {

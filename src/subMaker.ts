@@ -48,8 +48,6 @@ export class SubMaker {
       return;
     }
 
-    // Offset and duration are in 100-nanosecond units (ticks)
-    // Convert to milliseconds: ticks / 10000
     const startMs = msg.offset / 10000;
     const durationMs = msg.duration / 10000;
 

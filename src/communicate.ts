@@ -1,13 +1,19 @@
-import WebSocket from "ws";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import WebSocket from "ws";
 import {
   DEFAULT_VOICE,
-  WSS_URL,
   SEC_MS_GEC_VERSION,
   WSS_HEADERS,
+  WSS_URL,
 } from "./constants";
 import { DRM } from "./drm";
+import {
+  NoAudioReceived,
+  UnexpectedResponse,
+  UnknownResponse,
+} from "./exceptions";
 import { TTSConfig } from "./ttsConfig";
+import type { CommunicateOptions, CommunicateState, TTSChunk } from "./types";
 import {
   connectId,
   dateToString,
@@ -17,13 +23,6 @@ import {
   splitTextByByteLength,
   unescapeXml,
 } from "./utils";
-import type { CommunicateOptions, CommunicateState, TTSChunk } from "./types";
-import {
-  NoAudioReceived,
-  UnexpectedResponse,
-  UnknownResponse,
-  WebSocketError,
-} from "./exceptions";
 
 export class Communicate {
   private ttsConfig: TTSConfig;
@@ -140,9 +139,6 @@ export class Communicate {
     sendCommandRequest();
     sendSsmlRequest();
 
-    // Create a promise wrapper for websocket events to treat them as an async iterator
-    // This is a manual implementation of async iterator for event emitter
-
     const messageQueue: any[] = [];
     let resolveNext: ((value?: any) => void) | null = null;
     let errorNext: ((err: any) => void) | null = null;
@@ -198,7 +194,6 @@ export class Communicate {
           break; // Move to next text chunk
         } else if (path !== "response" && path !== "turn.start") {
           // throw new UnknownResponse("Unknown path received");
-          // Python ignores unknown paths via if/elif logic structure, strict throw might break changes
         }
       }
       // Handling Binary Message
@@ -264,15 +259,6 @@ export class Communicate {
       : undefined;
     const connectUrl = `${WSS_URL}&ConnectionId=${connectId()}&Sec-MS-GEC=${DRM.generateSecMsGec()}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`;
 
-    // Helper to connect and stream one text chunk
-    // We recreate connection logic per chunk if needed, but standard logic implies one session.
-    // However, the python code iterates texts and connects for each if the loop is inside.
-    // Wait, Python `__stream` creates ONE connection.
-    // But `stream` iterates `self.texts`.
-    // Inside `stream`, it calls `__stream`.
-    // `__stream` opens a NEW websocket connection.
-    // So for every 4KB chunk, it opens a new connection.
-
     for (const textChunk of this.texts) {
       this.state.partialText = textChunk;
 
@@ -283,7 +269,7 @@ export class Communicate {
           const ws = new WebSocket(connectUrl, {
             headers: DRM.headersWithMuid(WSS_HEADERS),
             agent: agent,
-            perMessageDeflate: false, // edge-tts uses compress=15, ws handles this usually or disable
+            perMessageDeflate: false,
           });
 
           // Wait for open
@@ -306,18 +292,9 @@ export class Communicate {
             e.code === 403 &&
             retryCount === 0
           ) {
-            // If using 'ws', checking headers on error is tricky as standard error event doesn't have them easily.
-            // However, 'ws' emits an 'unexpected-response' event for non-101 status codes.
-            // To handle this correctly in Node 'ws', we need to listen to 'unexpected-response'.
-            // For simplicity here, we assume if we failed handshake, we might need skew adjust.
-            // But without the headers, we can't adjust.
-            // The Python code relies on aiohttp's exception carrying headers.
-            // In 'ws', we need to hook into the upgrade request.
             throw e;
           }
 
-          // Simplification: The Python DRM skew fix is very specific.
-          // To strictly port it, we'd need to capture the response headers on failure.
           throw e;
         }
       }
