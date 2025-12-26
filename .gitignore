@@ -1,28 +1,34 @@
-# General files
+# dependencies (bun install)
 node_modules
-package-lock.json
 
-# MacOS-generated files
-.DS_Store
+# output
+out
+dist
+*.tgz
 
-# Yarn errors and logs
-*.log
+# code coverage
+coverage
+*.lcov
 
-# local VSCode files
-.history
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
-# vscode setings
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-.vscode/
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
 
-# Exception for extension recommendations
-!.vscode/extensions.json
-
+# IntelliJ based IDEs
 .idea
 
-example_audio.webm
-example_audio_pitched.webm
-
-unused-deps.json
+# Finder (MacOS) folder config
+.DS_Store

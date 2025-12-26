@@ -1,50 +1,58 @@
 {
   "name": "@bestcodes/edge-tts",
-  "version": "1.0.3",
-  "description": "An Azure Speech Service module that uses the Microsoft Edge Read Aloud API.",
-  "author": "The-Best-Codes",
-  "license": "MIT",
+  "description": "Free in-browser Text-to-Speech using Microsoft Edge TTS",
   "repository": {
     "type": "git",
-    "url": "https://github.com/The-Best-Codes/edge-tts.git"
+    "url": "git+https://github.com/The-Best-Codes/edge-tts.git"
   },
+  "keywords": [
+    "tts",
+    "text to speech",
+    "speech",
+    "edge",
+    "edgetts"
+  ],
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/The-Best-Codes/edge-tts/issues"
   },
-  "homepage": "https://github.com/The-Best-Codes/edge-tts#readme",
-  "keywords": [
-    "tts",
-    "text-to-speech",
-    "speech",
-    "text",
-    "voice",
-    "ssml",
-    "azure",
-    "speech-synthesis",
-    "readaloud",
-    "edge",
-    "microsoft"
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
   ],
-  "module": "./dist/index",
-  "main": "./dist/index",
+  "homepage": "https://github.com/The-Best-Codes/edge-tts",
+  "version": "2.0.0-beta.0",
+  "author": {
+    "name": "The-Best-Codes",
+    "url": "https://bestcodes.dev"
+  },
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "minify": "find dist/ -name '*.js' -type f -exec terser {} --compress --mangle --output {} \\;",
-    "build": "tsc --project tsconfig.json --outDir dist && npm run minify",
-    "prepublishOnly": "npm run build",
-    "depclean": "sh depclean.sh",
-    "update": "npm update --save && npm update --save-dev && npx npm-check-updates@latest -u && npm install",
-    "maintain": "npm run depclean && npm run update"
+    "prepublishOnly": "bun run b",
+    "b": "rm -rf dist && bun run build:main && bun run build:types",
+    "build:main": "bun build src/index.ts --outfile dist/index.mjs --format esm --packages external --minify --target browser",
+    "build:types": "dts-bundle-generator src/index.ts -o dist/index.d.ts --external-imports",
+    "typecheck": "tsc -b --incremental --noEmit",
+    "fmt": "prettier . -w --cache --cache-strategy metadata"
   },
   "devDependencies": {
-    "@types/node": "^22.8.1",
-    "@types/randombytes": "^2.0.3",
-    "axios": "^1.7.7",
-    "buffer": "^6.0.3",
-    "isomorphic-ws": "^5.0.0",
-    "randombytes": "^2.1.0",
-    "terser": "^5.36.0"
+    "@types/bun": "^1.3.5",
+    "@types/node": "^25.0.3",
+    "@types/uuid": "^11.0.0",
+    "@types/ws": "^8.18.1",
+    "dts-bundle-generator": "^9.5.1",
+    "prettier": "^3.7.4"
   },
-  "files": [
-    "dist/"
-  ]
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "https-proxy-agent": "^7.0.6",
+    "uuid": "^13.0.0",
+    "ws": "^8.18.3"
+  }
 }
