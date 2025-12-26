@@ -7,7 +7,7 @@ import { TTSConfig } from "./ttsConfig";
 import * as utils from "./utils";
 import { VoicesManager, listVoices } from "./voices";
 
-export const Raw = {
+export const Experimental_Raw = {
   Communicate,
   SubMaker,
   VoicesManager,
