@@ -16,6 +16,11 @@
   "bugs": {
     "url": "https://github.com/The-Best-Codes/edge-tts/issues"
   },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
+  ],
   "homepage": "https://github.com/The-Best-Codes/edge-tts",
   "version": "2.0.0-beta.0",
   "author": {
