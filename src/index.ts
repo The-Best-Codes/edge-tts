@@ -1,7 +1,213 @@
-export * from "./communicate";
-export * from "./constants";
-export * from "./exceptions";
-export * from "./subMaker";
-export * from "./ttsConfig";
-export * from "./types";
-export * from "./voices";
+import * as fs from "fs";
+import * as path from "path";
+import { Communicate } from "./communicate";
+import * as constants from "./constants";
+import { DRM } from "./drm";
+import * as exceptions from "./exceptions";
+import { SubMaker } from "./subMaker";
+import { TTSConfig } from "./ttsConfig";
+import * as types from "./types";
+import * as utils from "./utils";
+import { VoicesManager, listVoices } from "./voices";
+
+export const Raw = {
+  Communicate,
+  SubMaker,
+  VoicesManager,
+  listVoices,
+  DRM,
+  TTSConfig,
+  exceptions,
+  types,
+  constants,
+  utils,
+};
+
+/**
+ * Options for streaming speech.
+ */
+export interface StreamSpeechOptions {
+  /** The text to convert to speech */
+  text: string;
+  /** Voice to use for synthesis (default: "en-US-EmmaMultilingualNeural") */
+  voice?: string;
+  /** Speaking rate in percentage, e.g., "+10%" or "-20%" (default: "+0%") */
+  rate?: string;
+  /** Volume in percentage, e.g., "+50%" or "-10%" (default: "+0%") */
+  volume?: string;
+  /** Pitch in hertz, e.g., "+10Hz" or "-5Hz" (default: "+0Hz") */
+  pitch?: string;
+  /** Boundary type for metadata: "WordBoundary" or "SentenceBoundary" (default: "SentenceBoundary") */
+  boundary?: "WordBoundary" | "SentenceBoundary";
+  /** Proxy URL for the WebSocket connection */
+  proxy?: string;
+  /** Connection timeout in seconds (default: 10) */
+  connectTimeoutSeconds?: number;
+  /** Receive timeout in seconds (default: 60) */
+  receiveTimeoutSeconds?: number;
+}
+
+/**
+ * Options for generating speech and writing to a file.
+ */
+export interface GenerateSpeechOptions extends StreamSpeechOptions {
+  /** Output file path for the generated audio */
+  outputPath: string;
+}
+
+/**
+ * Options for streaming speech with subtitles.
+ */
+export interface StreamSpeechWithSubtitlesOptions extends StreamSpeechOptions {
+  /** Output file path for the generated subtitles (SRT format) */
+  subtitlePath: string;
+}
+
+/**
+ * Stream speech audio from text.
+ * @param options - Configuration options for speech synthesis
+ * @returns Promise resolving to the audio buffer
+ */
+export async function streamSpeech(
+  options: StreamSpeechOptions,
+): Promise<Buffer> {
+  const {
+    text,
+    voice = "en-US-EmmaMultilingualNeural",
+    rate = "+0%",
+    volume = "+0%",
+    pitch = "+0Hz",
+    boundary = "SentenceBoundary",
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+  } = options;
+
+  const communicate = new Communicate(text, voice, {
+    rate,
+    volume,
+    pitch,
+    boundary,
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+  });
+
+  const audioChunks: Buffer[] = [];
+
+  for await (const chunk of communicate.stream()) {
+    if (chunk.type === "audio" && chunk.data) {
+      audioChunks.push(chunk.data);
+    }
+  }
+
+  return Buffer.concat(audioChunks);
+}
+
+/**
+ * Generate speech from text and save it to a file.
+ * @param options - Configuration options including the output file path
+ * @returns Promise that resolves when the file is written
+ */
+export async function streamSpeechToFile(
+  options: GenerateSpeechOptions,
+): Promise<void> {
+  const { outputPath, ...streamOptions } = options;
+
+  const audioBuffer = await streamSpeech(streamOptions);
+
+  const dir = path.dirname(outputPath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  fs.writeFileSync(outputPath, audioBuffer);
+}
+
+/**
+ * Stream speech audio with generated subtitles.
+ * @param options - Configuration options including the subtitle file path
+ * @returns Promise resolving to the audio buffer and subtitles string
+ */
+export async function streamSpeechWithSubtitles(
+  options: StreamSpeechWithSubtitlesOptions,
+): Promise<{ audio: Buffer; subtitles: string }> {
+  const {
+    text,
+    voice = "en-US-EmmaMultilingualNeural",
+    rate = "+0%",
+    volume = "+0%",
+    pitch = "+0Hz",
+    boundary = "WordBoundary",
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+    subtitlePath,
+  } = options;
+
+  const communicate = new Communicate(text, voice, {
+    rate,
+    volume,
+    pitch,
+    boundary,
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+  });
+
+  const subMaker = new SubMaker();
+  const audioChunks: Buffer[] = [];
+
+  for await (const chunk of communicate.stream()) {
+    if (chunk.type === "audio" && chunk.data) {
+      audioChunks.push(chunk.data);
+    } else if (
+      chunk.type === "WordBoundary" ||
+      chunk.type === "SentenceBoundary"
+    ) {
+      subMaker.feed(chunk);
+    }
+  }
+
+  const audio = Buffer.concat(audioChunks);
+  const subtitles = subMaker.getSrt();
+
+  const dir = path.dirname(subtitlePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  fs.writeFileSync(subtitlePath, subtitles);
+
+  return { audio, subtitles };
+}
+
+/**
+ * Get the list of available voices from the Edge TTS service.
+ * @param proxy - Optional proxy URL for the HTTP request
+ * @returns Promise resolving to an array of voice objects
+ */
+export async function getVoices(proxy?: string) {
+  return listVoices(proxy);
+}
+
+/**
+ * Find voices matching specific criteria.
+ * @param options - Filter options for finding voices
+ * @param proxy - Optional proxy URL for the HTTP request
+ * @returns Promise resolving to an array of matching voice objects
+ */
+export async function findVoices(
+  options: {
+    Gender?: "Female" | "Male";
+    Locale?: string;
+    Language?: string;
+    ShortName?: string;
+  },
+  proxy?: string,
+) {
+  const manager = await VoicesManager.create(
+    proxy ? await listVoices(proxy) : undefined,
+  );
+  return manager.find(options);
+}
