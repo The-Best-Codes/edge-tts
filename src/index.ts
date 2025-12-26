@@ -1,12 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Communicate } from "./communicate";
-import * as constants from "./constants";
 import { DRM } from "./drm";
-import * as exceptions from "./exceptions";
 import { SubMaker } from "./subMaker";
 import { TTSConfig } from "./ttsConfig";
-import * as types from "./types";
 import * as utils from "./utils";
 import { VoicesManager, listVoices } from "./voices";
 
@@ -17,9 +14,6 @@ export const Raw = {
   listVoices,
   DRM,
   TTSConfig,
-  exceptions,
-  types,
-  constants,
   utils,
 };
 
