@@ -52,6 +52,6 @@ export interface CommunicateOptions {
   pitch?: string;
   boundary?: "WordBoundary" | "SentenceBoundary";
   proxy?: string;
-  connectTimeout?: number; // seconds
-  receiveTimeout?: number; // seconds
+  connectTimeoutSeconds?: number;
+  receiveTimeoutSeconds?: number;
 }

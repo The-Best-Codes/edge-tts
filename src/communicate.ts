@@ -40,8 +40,8 @@ export class Communicate {
       volume: "+0%",
       pitch: "+0Hz",
       boundary: "SentenceBoundary",
-      connectTimeout: 10,
-      receiveTimeout: 60,
+      connectTimeoutSeconds: 10,
+      receiveTimeoutSeconds: 60,
       ...options,
     };
 

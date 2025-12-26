@@ -9,7 +9,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "prepublishOnly": "bun run build:main && bun run build:types",
+    "prepublishOnly": "rm -rf dist && bun run build:main && bun run build:types",
     "build:main": "bun build src/index.ts --outfile dist/index.mjs --format esm --packages external --minify --target browser",
     "build:types": "dts-bundle-generator src/index.ts -o dist/index.d.ts --external-imports",
     "typecheck": "tsc -b --incremental --noEmit",
