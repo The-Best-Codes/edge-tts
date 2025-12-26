@@ -1,5 +1,22 @@
 {
   "name": "@bestcodes/edge-tts",
+  "description": "Free in-browser Text-to-Speech using Microsoft Edge TTS",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Best-Codes/edge-tts.git"
+  },
+  "keywords": [
+    "tts",
+    "text to speech",
+    "speech",
+    "edge",
+    "edgetts"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/The-Best-Codes/edge-tts/issues"
+  },
+  "homepage": "https://github.com/The-Best-Codes/edge-tts",
   "version": "2.0.0-beta.0",
   "author": {
     "name": "The-Best-Codes",
