@@ -67,7 +67,7 @@ export class VoicesManager {
 
     instance.voices = source.map((v) => ({
       ...v,
-      Language: v.Locale.split("-")[0],
+      Language: v.Locale.split("-")[0] ?? "",
     }));
     instance.createCalled = true;
     return instance;

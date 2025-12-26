@@ -86,7 +86,7 @@ function findSafeUtf8SplitPoint(textSegment: Buffer): number {
       // Simpler check: try decoding. If the last char is the replacement char, we cut it.
       // But standard check:
       const lastByte = sub[sub.length - 1];
-      if ((lastByte & 0x80) === 0) {
+      if (lastByte !== undefined && (lastByte & 0x80) === 0) {
         return splitAt; // ASCII, safe
       }
 

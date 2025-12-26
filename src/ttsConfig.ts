@@ -34,7 +34,7 @@ export class TTSConfig {
       const lang = match[1];
       let region = match[2];
       let name = match[3];
-      if (name.includes("-")) {
+      if (name && name.includes("-")) {
         region = `${region}-${name.split("-")[0]}`;
         name = name.split("-")[1];
       }
