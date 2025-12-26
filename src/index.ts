@@ -4,6 +4,7 @@ import { Communicate } from "./communicate";
 import { DRM } from "./drm";
 import { SubMaker } from "./subMaker";
 import { TTSConfig } from "./ttsConfig";
+import type { TTSChunk } from "./types";
 import * as utils from "./utils";
 import { VoicesManager, listVoices } from "./voices";
 
@@ -123,7 +124,7 @@ export async function generateSpeechToFile(
  * @param options - Configuration options including the subtitle file path
  * @returns Promise resolving to the audio buffer and subtitles string
  */
-export async function generateSpeechWithSubtitles(
+export async function generateSpeechWithSubtitlesToFile(
   options: GenerateSpeechWithSubtitlesOptions,
 ): Promise<{ audio: Buffer; subtitles: string }> {
   const {
@@ -204,4 +205,128 @@ export async function findVoices(
     proxy ? await listVoices(proxy) : undefined,
   );
   return manager.find(options);
+}
+
+/**
+ * Stream speech audio in real-time from text.
+ * @param options - Configuration options for speech synthesis
+ * @returns AsyncGenerator yielding audio and metadata chunks as they arrive
+ */
+export async function* streamSpeech(
+  options: GenerateSpeechOptions,
+): AsyncGenerator<TTSChunk> {
+  const {
+    text,
+    voice = "en-US-EmmaMultilingualNeural",
+    rate = "+0%",
+    volume = "+0%",
+    pitch = "+0Hz",
+    boundary = "SentenceBoundary",
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+  } = options;
+
+  const communicate = new Communicate(text, voice, {
+    rate,
+    volume,
+    pitch,
+    boundary,
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+  });
+
+  for await (const chunk of communicate.stream()) {
+    yield chunk;
+  }
+}
+
+/**
+ * Stream speech audio with subtitles in real-time.
+ * @param options - Configuration options including the subtitle file path
+ * @returns AsyncGenerator yielding audio chunks and subtitle data as they arrive
+ */
+export async function* streamSpeechWithSubtitlesToFile(
+  options: GenerateSpeechWithSubtitlesOptions,
+): AsyncGenerator<TTSChunk & { subtitles?: string }> {
+  const {
+    text,
+    voice = "en-US-EmmaMultilingualNeural",
+    rate = "+0%",
+    volume = "+0%",
+    pitch = "+0Hz",
+    boundary = "WordBoundary",
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+    subtitlePath,
+  } = options;
+
+  const communicate = new Communicate(text, voice, {
+    rate,
+    volume,
+    pitch,
+    boundary,
+    proxy,
+    connectTimeoutSeconds,
+    receiveTimeoutSeconds,
+  });
+
+  const subMaker = new SubMaker();
+
+  // Create subtitle file directory
+  const dir = path.dirname(subtitlePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  for await (const chunk of communicate.stream()) {
+    if (chunk.type === "audio" && chunk.data) {
+      yield chunk;
+    } else if (
+      chunk.type === "WordBoundary" ||
+      chunk.type === "SentenceBoundary"
+    ) {
+      subMaker.feed(chunk);
+      // Write subtitles incrementally as boundaries are received
+      const subtitles = subMaker.getSrt();
+      fs.writeFileSync(subtitlePath, subtitles);
+      yield { ...chunk, subtitles };
+    }
+  }
+}
+
+/**
+ * Stream speech audio directly to a file in real-time.
+ * @param options - Configuration options including the output file path
+ * @returns AsyncGenerator yielding progress information as chunks are written
+ */
+export async function* streamSpeechToFile(
+  options: GenerateSpeechToFileOptions,
+): AsyncGenerator<{ bytesWritten: number; chunkSize: number }> {
+  const { outputPath, ...streamOptions } = options;
+
+  const dir = path.dirname(outputPath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  const fileStream = fs.createWriteStream(outputPath);
+  let totalBytesWritten = 0;
+
+  try {
+    for await (const chunk of streamSpeech(streamOptions)) {
+      if (chunk.type === "audio" && chunk.data) {
+        fileStream.write(chunk.data);
+        totalBytesWritten += chunk.data.length;
+        yield {
+          bytesWritten: totalBytesWritten,
+          chunkSize: chunk.data.length,
+        };
+      }
+    }
+  } finally {
+    fileStream.end();
+  }
 }
