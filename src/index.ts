@@ -18,9 +18,9 @@ export const Experimental_Raw = {
 };
 
 /**
- * Options for streaming speech.
+ * Options for generating speech.
  */
-export interface StreamSpeechOptions {
+export interface GenerateSpeechOptions {
   /** The text to convert to speech */
   text: string;
   /** Voice to use for synthesis (default: "en-US-EmmaMultilingualNeural") */
@@ -44,26 +44,26 @@ export interface StreamSpeechOptions {
 /**
  * Options for generating speech and writing to a file.
  */
-export interface GenerateSpeechOptions extends StreamSpeechOptions {
+export interface GenerateSpeechToFileOptions extends GenerateSpeechOptions {
   /** Output file path for the generated audio */
   outputPath: string;
 }
 
 /**
- * Options for streaming speech with subtitles.
+ * Options for generating speech with subtitles.
  */
-export interface StreamSpeechWithSubtitlesOptions extends StreamSpeechOptions {
+export interface GenerateSpeechWithSubtitlesOptions extends GenerateSpeechOptions {
   /** Output file path for the generated subtitles (SRT format) */
   subtitlePath: string;
 }
 
 /**
- * Stream speech audio from text.
+ * Generate speech audio from text.
  * @param options - Configuration options for speech synthesis
  * @returns Promise resolving to the audio buffer
  */
-export async function streamSpeech(
-  options: StreamSpeechOptions,
+export async function generateSpeech(
+  options: GenerateSpeechOptions,
 ): Promise<Buffer> {
   const {
     text,
@@ -103,12 +103,12 @@ export async function streamSpeech(
  * @param options - Configuration options including the output file path
  * @returns Promise that resolves when the file is written
  */
-export async function streamSpeechToFile(
-  options: GenerateSpeechOptions,
+export async function generateSpeechToFile(
+  options: GenerateSpeechToFileOptions,
 ): Promise<void> {
-  const { outputPath, ...streamOptions } = options;
+  const { outputPath, ...generateOptions } = options;
 
-  const audioBuffer = await streamSpeech(streamOptions);
+  const audioBuffer = await generateSpeech(generateOptions);
 
   const dir = path.dirname(outputPath);
   if (!fs.existsSync(dir)) {
@@ -119,12 +119,12 @@ export async function streamSpeechToFile(
 }
 
 /**
- * Stream speech audio with generated subtitles.
+ * Generate speech audio with generated subtitles.
  * @param options - Configuration options including the subtitle file path
  * @returns Promise resolving to the audio buffer and subtitles string
  */
-export async function streamSpeechWithSubtitles(
-  options: StreamSpeechWithSubtitlesOptions,
+export async function generateSpeechWithSubtitles(
+  options: GenerateSpeechWithSubtitlesOptions,
 ): Promise<{ audio: Buffer; subtitles: string }> {
   const {
     text,
