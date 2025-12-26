@@ -21,9 +21,9 @@ bun add @bestcodes/edge-tts
 ### Get audio buffer
 
 ```ts
-import { streamSpeech } from "@bestcodes/edge-tts";
+import { generateSpeech } from "@bestcodes/edge-tts";
 
-const audio = await streamSpeech({
+const audio = await generateSpeech({
   text: "Hello, world!",
   voice: "en-US-EmmaMultilingualNeural",
 });
@@ -34,9 +34,9 @@ const audio = await streamSpeech({
 ### Save to file
 
 ```ts
-import { streamSpeechToFile } from "@bestcodes/edge-tts";
+import { generateSpeechToFile } from "@bestcodes/edge-tts";
 
-await streamSpeechToFile({
+await generateSpeechToFile({
   text: "Hello, world!",
   outputPath: "./output.mp3",
 });
@@ -45,12 +45,63 @@ await streamSpeechToFile({
 ### With subtitles
 
 ```ts
-import { streamSpeechWithSubtitles } from "@bestcodes/edge-tts";
+import { generateSpeechWithSubtitlesToFile } from "@bestcodes/edge-tts";
 
-const { audio, subtitles } = await streamSpeechWithSubtitles({
+const { audio, subtitles } = await generateSpeechWithSubtitlesToFile({
   text: "This text will have subtitles.",
   subtitlePath: "./subtitles.srt",
 });
+```
+
+## Real-time Streaming
+
+### Stream audio chunks
+
+```ts
+import { streamSpeech } from "@bestcodes/edge-tts";
+
+for await (const chunk of streamSpeech({
+  text: "Hello, world!",
+  voice: "en-US-EmmaMultilingualNeural",
+})) {
+  if (chunk.type === "audio" && chunk.data) {
+    // Process audio chunk in real-time
+    console.log(`Received ${chunk.data.length} bytes`);
+  }
+}
+```
+
+### Stream directly to file with progress
+
+```ts
+import { streamSpeechToFile } from "@bestcodes/edge-tts";
+
+for await (const progress of streamSpeechToFile({
+  text: "Hello, world!",
+  outputPath: "./output.mp3",
+})) {
+  console.log(
+    `Written: ${progress.bytesWritten} bytes (chunk: ${progress.chunkSize})`,
+  );
+}
+```
+
+### Stream with subtitles (real-time updates)
+
+```ts
+import { streamSpeechWithSubtitlesToFile } from "@bestcodes/edge-tts";
+
+for await (const chunk of streamSpeechWithSubtitlesToFile({
+  text: "This text will have subtitles.",
+  subtitlePath: "./subtitles.srt",
+})) {
+  if (chunk.type === "audio" && chunk.data) {
+    // Process audio chunk
+  } else if (chunk.subtitles) {
+    // Subtitles file updated in real-time
+    console.log("Subtitles updated:", chunk.subtitles);
+  }
+}
 ```
 
 ## Options
@@ -66,8 +117,8 @@ const { audio, subtitles } = await streamSpeechWithSubtitles({
   proxy?: string;                  // Optional proxy URL
   connectTimeoutSeconds?: number;  // Default: 10
   receiveTimeoutSeconds?: number;  // Default: 60
-  outputPath?: string;             // For streamSpeechToFile
-  subtitlePath?: string;           // For streamSpeechWithSubtitles
+  outputPath?: string;             // For generateSpeechToFile/streamSpeechToFile
+  subtitlePath?: string;           // For generateSpeechWithSubtitlesToFile/streamSpeechWithSubtitlesToFile
 }
 ```
 
@@ -87,9 +138,9 @@ const englishVoices = await findVoices({ Locale: "en-US" });
 ## Low-level API
 
 ```ts
-import { Raw } from "@bestcodes/edge-tts";
+import { Experimental_Raw } from "@bestcodes/edge-tts";
 
-const communicate = new Raw.Communicate(
+const communicate = new Experimental_Raw.Communicate(
   "Hello!",
   "en-US-EmmaMultilingualNeural",
 );
