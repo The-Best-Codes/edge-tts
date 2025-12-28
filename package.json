@@ -22,7 +22,7 @@
     "README.md"
   ],
   "homepage": "https://github.com/The-Best-Codes/edge-tts",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": {
     "name": "The-Best-Codes",
     "url": "https://bestcodes.dev"
@@ -33,7 +33,7 @@
   "scripts": {
     "prepublishOnly": "bun run b",
     "b": "rm -rf dist && bun run build:main && bun run build:types",
-    "build:main": "bun build src/index.ts --outfile dist/index.mjs --format esm --packages external --minify --target browser",
+    "build:main": "bun build src/index.ts --outfile dist/index.mjs --format esm --packages external --minify --target node",
     "build:types": "dts-bundle-generator src/index.ts -o dist/index.d.ts --external-imports",
     "typecheck": "tsc -b --incremental --noEmit",
     "fmt": "prettier . -w --cache --cache-strategy metadata"
