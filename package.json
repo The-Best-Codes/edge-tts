@@ -1,6 +1,6 @@
 {
   "name": "@bestcodes/edge-tts",
-  "description": "Free in-browser Text-to-Speech using Microsoft Edge TTS",
+  "description": "Free Text-to-Speech using Microsoft Edge TTS",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/The-Best-Codes/edge-tts.git"
